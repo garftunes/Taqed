@@ -1215,10 +1215,18 @@
     <div class="show-item">
       <div class="show-date">TBA</div>
       <div>
-        <div class="show-venue">TBA</div>
-        <div class="show-location">TBA</div>
+        <div class="show-venue">Venue Name</div>
+        <div class="show-location">City, State</div>
       </div>
-      <a href="#" class="btn-ticket">Contact</a>
+      <a href="#" class="btn-ticket">Tickets</a>
+    </div>
+    <div class="show-item">
+      <div class="show-date">TBA</div>
+      <div>
+        <div class="show-venue">Venue Name</div>
+        <div class="show-location">City, State</div>
+      </div>
+      <a href="#" class="btn-ticket">Tickets</a>
     </div>
   </div>
 
@@ -1298,116 +1306,154 @@
 <script>
 /*
  * ===================================================================
- * SETUP GUIDE — read this before deploying
+ * SETUP GUIDE
  * ===================================================================
  *
- * 1. AUDIO FILES
- *    - Put your mp3/m4a/ogg files in an 'assets/audio/' folder.
- *    - Update the 'src' field for each track in the TRACKS array below.
- *    - Example: src: 'assets/audio/01-that-hits-the-spot.mp3'
- *    - For large files, host on Cloudflare R2 or Backblaze B2 and use
- *      the full CDN URL instead.
+ * 1. SET YOUR R2 PUBLIC URL (one line to change):
+ *    Find the R2_BASE constant below and paste your bucket's public URL.
+ *    Get it from: Cloudflare Dashboard → R2 → your bucket → Settings → Public Access
+ *    Example: "https://pub-abc123.r2.dev"
+ *    Or with custom domain: "https://media.taqed.com"
  *
- * 2. LYRICS — TTML
- *    - Put your .ttml files in 'assets/lyrics/' folder.
- *    - Update the 'ttmlSrc' field for each track.
- *    - Example: ttmlSrc: 'assets/lyrics/01-that-hits-the-spot.ttml'
- *    - The parser below handles standard TTML with begin/end timestamps.
- *    - You can also use the inline 'lyrics' array for simple line-by-line
- *      lyrics (keeps them in the JS, no external file needed).
+ * 2. UPLOAD YOUR FILES to R2 in this structure:
+ *    /manifest.json          ← the manifest.json file (edit & upload)
+ *    /audio/01-slug.mp3      ← audio files
+ *    /lyrics/01-slug.ttml    ← TTML lyric files (same slug as audio)
  *
- * 3. ALBUM ART
- *    - Put your cover image in 'assets/album-cover.jpg'
- *    - (or update the src in the hero <img> tag above)
+ * 3. CONFIGURE CORS on your R2 bucket:
+ *    Cloudflare Dashboard → R2 → bucket → Settings → CORS Policy
+ *    Paste this policy:
+ *    [
+ *      {
+ *        "AllowedOrigins": ["https://www.taqed.com", "http://localhost:*"],
+ *        "AllowedMethods": ["GET", "HEAD"],
+ *        "AllowedHeaders": ["*"],
+ *        "MaxAgeSeconds": 86400
+ *      }
+ *    ]
  *
- * 4. MAILING LIST
- *    - Wire the form to Mailchimp: replace the form action URL with
- *      your Mailchimp embed form POST URL.
- *    - Or use Buttondown.email — they have a simple form endpoint.
+ * 4. TITLE PARSING from slug:
+ *    Slugs like "01-that-hits-the-spot" auto-become "That Hits the Spot"
+ *    (leading number + dashes stripped, each word Title Cased).
+ *    Override per-track in manifest.json with an explicit "title" field.
  *
- * 5. SHOWS
- *    - Edit the .show-item blocks in the HTML above.
+ * 5. ALBUM ART:
+ *    Upload cover image to R2 at /assets/album-cover.jpg
+ *    (or change manifest.json "cover" path)
+ *
+ * 6. MAILING LIST:
+ *    Replace the form action URL with your Mailchimp/Buttondown endpoint.
+ *
+ * 7. SHOWS: Edit the .show-item blocks in the HTML above.
  *
  * ===================================================================
  */
 
 /* ------------------------------------------------------------------
-   TRACK DATA
-   Fill in 'src' (audio URL) and either 'ttmlSrc' (TTML file path)
-   or 'lyrics' (inline array) for each track.
-   If both are provided, TTML takes priority.
+   ▼▼▼  ONLY LINE YOU NEED TO CHANGE  ▼▼▼
+   Paste your Cloudflare R2 public bucket URL here (no trailing slash).
    ------------------------------------------------------------------ */
-const TRACKS = [
-  {
-    num: 1,
-    title: "That Hits the Spot",
-    duration: "3:42",
-    src: "",                              // e.g. "assets/audio/01-that-hits-the-spot.mp3"
-    ttmlSrc: "",                          // e.g. "assets/lyrics/01-that-hits-the-spot.ttml"
-    lyrics: [
-      { time: 0,   text: "The needle drops, the room goes still" },
-      { time: 4,   text: "Something in the air bends against your will" },
-      { time: 9,   text: "You've been carrying a weight you can't name" },
-      { time: 14,  text: "And the song knows — it always knew your name" },
-      { time: 20,  text: "" },
-      { time: 21,  text: "That hits the spot" },
-      { time: 25,  text: "Like a nerve you forgot you had" },
-      { time: 30,  text: "That hits the spot" },
-      { time: 34,  text: "The good hurt and the good sad" },
-    ]
-  },
-  {
-    num: 2,
-    title: "Bloodlines",
-    duration: "4:15",
-    src: "",
-    ttmlSrc: "",
-    lyrics: [
-      { time: 0,  text: "My grandfather's hands built this road" },
-      { time: 6,  text: "Stone by stone and year by year" },
-      { time: 12, text: "I'm still walking where he walked" },
-      { time: 18, text: "Still carrying what he couldn't bear" },
-    ]
-  },
-  {
-    num: 3,
-    title: "Open Wound",
-    duration: "3:58",
-    src: "",
-    ttmlSrc: "",
-    lyrics: [
-      { time: 0,  text: "You want to know the truth?" },
-      { time: 4,  text: "It's still bleeding" },
-      { time: 8,  text: "Not the way it used to" },
-      { time: 12, text: "But enough" },
-    ]
-  },
-  {
-    num: 4,
-    title: "Red Flowers",
-    duration: "5:02",
-    src: "",
-    ttmlSrc: "",
-    lyrics: [
-      { time: 0,  text: "Red flowers in November rain" },
-      { time: 6,  text: "Something blooms where nothing should" },
-      { time: 12, text: "You plant the things you love in pain" },
-      { time: 18, text: "And pray they're misunderstood" },
-    ]
-  },
-  {
-    num: 5,
-    title: "The Push",
-    duration: "3:27",
-    src: "",
-    ttmlSrc: "",
-    lyrics: [
-      { time: 0,  text: "One more push" },
-      { time: 3,  text: "One more inch" },
-      { time: 6,  text: "Every nail knows what it's worth" },
-    ]
-  },
-];
+const R2_BASE = "https://pub-REPLACEME.r2.dev";
+
+/* ------------------------------------------------------------------
+   MANIFEST URL — fetched on page load
+   ------------------------------------------------------------------ */
+const MANIFEST_URL = `${R2_BASE}/manifest.json`;
+
+/* ------------------------------------------------------------------
+   SLUG → TITLE CONVERTER
+   "01-that-hits-the-spot" → "That Hits the Spot"
+   ------------------------------------------------------------------ */
+function slugToTitle(slug) {
+  return slug
+    .replace(/^\d+-/, '')             // strip leading "01-"
+    .split('-')                        // split on dashes
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))  // Title Case
+    .join(' ');
+}
+
+/* ------------------------------------------------------------------
+   MANIFEST LOADER
+   Fetches manifest.json from R2 and builds the TRACKS array.
+   Falls back to a helpful error state if the manifest can't load.
+   ------------------------------------------------------------------ */
+let TRACKS = [];
+
+async function loadManifest() {
+  showPlayerLoading(true);
+  try {
+    const res = await fetch(MANIFEST_URL, { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const manifest = await res.json();
+
+    const base = manifest._baseUrl || R2_BASE;
+
+    TRACKS = manifest.tracks.map((t, i) => {
+      const slug       = t.slug;
+      const audioExt   = t.audioExt  || 'mp3';
+      const lyricsExt  = t.lyricsExt || 'ttml';
+
+      // Title: explicit > derived from slug
+      const title = t.title || slugToTitle(slug);
+
+      return {
+        num:      i + 1,
+        title:    title,
+        duration: t.duration || '—:——',
+        src:      `${base}/audio/${slug}.${audioExt}`,
+        ttmlSrc:  `${base}/lyrics/${slug}.${lyricsExt}`,
+        lyrics:   []  // populated at play-time from TTML
+      };
+    });
+
+    // Update album title in DOM if provided
+    if (manifest.album) {
+      const sectionTitle = document.querySelector('#music .section-title');
+      if (sectionTitle && manifest.album.title) {
+        sectionTitle.textContent = manifest.album.title;
+      }
+      // Update hero album cover if manifest specifies one
+      if (manifest.album.cover) {
+        const heroImg = document.querySelector('.album-cover');
+        if (heroImg) heroImg.src = `${base}/${manifest.album.cover}`;
+      }
+    }
+
+    showPlayerLoading(false);
+    buildWaveform();
+    buildTrackList();
+    selectTrack(0);
+    document.getElementById('audioNotice').style.display = 'none';
+
+  } catch(err) {
+    console.error('Could not load manifest:', err);
+    showManifestError(err);
+  }
+}
+
+function showPlayerLoading(on) {
+  const title = document.getElementById('nowTitle');
+  if (on) {
+    title.textContent = 'Loading tracks…';
+    document.getElementById('trackList').innerHTML =
+      '<div style="padding:1.5rem 1rem;font-family:var(--font-head);font-size:0.9rem;color:var(--warm-gray);letter-spacing:0.08em;">Loading…</div>';
+  }
+}
+
+function showManifestError(err) {
+  document.getElementById('nowTitle').textContent = 'Could not load tracks';
+  document.getElementById('trackList').innerHTML = `
+    <div style="padding:1.2rem 1rem;font-family:var(--font-head);font-size:0.85rem;color:var(--red);line-height:1.7;">
+      Manifest not found.<br>
+      <span style="color:var(--warm-gray);">
+        Check that <code style="font-size:0.8rem;">${MANIFEST_URL}</code> is accessible
+        and your R2 CORS policy allows this origin.
+      </span>
+    </div>`;
+  document.getElementById('audioNotice').innerHTML =
+    '⚠ Set <code>R2_BASE</code> in the script and upload <code>manifest.json</code> to your bucket.';
+  document.getElementById('audioNotice').style.display = '';
+}
 
 /* ------------------------------------------------------------------
    STATE
@@ -1832,10 +1878,10 @@ function handleSubscribe(e) {
 document.getElementById('footerYear').textContent = new Date().getFullYear();
 
 /* ------------------------------------------------------------------
-   INIT
+   INIT — load manifest from R2, then build player
    ------------------------------------------------------------------ */
 buildWaveform();
-selectTrack(0);
+loadManifest();
 
 </script>
 </body>
