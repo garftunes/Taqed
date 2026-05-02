@@ -1,0 +1,140 @@
+{
+  "_comment": "Upload this file to the ROOT of your R2 bucket. Update it whenever you add or change tracks.",
+  "_baseUrl": "https://pub-912068653da342a884e22d2c35f8c12a.r2.dev",
+
+  "album": {
+    "title": "That Hits the Spot",
+    "artist": "taqed",
+    "year": 2026,
+    "cover": "assets/album-cover.jpg"
+  },
+
+  "tracks": [
+    {
+      "slug": "01-Today",
+      "title": "Today",
+      "duration": "3:43",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+    {
+      "slug": "02-Hearts-Gone-Wrong",
+      "title": "Hearts Gone Wrong",
+      "duration": "3:22",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+    {
+      "slug": "03-Dont-Go",
+      "title": "Don't Go",
+      "duration": "3:22",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+    {
+      "slug": "04-Pick-Me-Energy",
+      "title": "Pick Me Energy",
+      "duration": "3:27",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+    {
+      "slug": "05-Shining-Sons",
+      "title": "Shining Sons",
+      "duration": "3:28",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+        {
+      "slug": "06-Thems-Driving-Words",
+      "title": "Thems Driving Words",
+      "duration": "3:00",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+        {
+      "slug": "07-Tomorrow",
+      "title": "Tomorrow",
+      "duration": "3:30",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+        {
+      "slug": "08-Little-Missus",
+      "title": "Little Missus",
+      "duration": "4:02",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+        {
+      "slug": "10-Hyper-hypocritical",
+      "title": "Hyper-hypocritical (explicit)",
+      "duration": "2:45",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+        {
+      "slug": "11-Denial",
+      "title": "Denial",
+      "duration": "3:50",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+        {
+      "slug": "12-The-Middle",
+      "title": "The Middle",
+      "duration": "4:37",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+        {
+      "slug": "13-Tough-Times",
+      "title": "Tough Times",
+      "duration": "4:07",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+        {
+      "slug": "14-Ghost-Town",
+      "title": "Ghost Town",
+      "duration": "3:40",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+        {
+      "slug": "15-Number-Go-Up",
+      "title": "Number Go Up (explicit)",
+      "duration": "3:40",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+        {
+      "slug": "16-False-Hero",
+      "title": "False Hero",
+      "duration": "3:36",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+            {
+      "slug": "17-Rook-Takes-Knight",
+      "title": "Rook Takes Knight",
+      "duration": "3:50",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+            {
+      "slug": "18-The-Comedown",
+      "title": "The Comedown",
+      "duration": "3:50",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    },
+            {
+      "slug": "19-Hand",
+      "title": "Hand",
+      "duration": "4:32",
+      "audioExt": "m4a",
+      "lyricsExt": "ttml"
+    }
+  ]
+}
