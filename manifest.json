@@ -1,6 +1,6 @@
 {
   "_comment": "Upload this file to the ROOT of your R2 bucket. Update it whenever you add or change tracks.",
-  "_baseUrl": "https://pub-912068653da342a884e22d2c35f8c12a.r2.dev",
+  "_baseUrl": "https://media.taqed.com",
 
   "album": {
     "title": "That Hits the Spot",
