@@ -14,11 +14,104 @@
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   /* =====================================================
+     PASSWORD GATE
+     DELETE everything marked GATE-START / GATE-END when going public.
+  ===================================================== */
+  #gate {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: #191510;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  #gate .gate-logo {
+    height: 56px;
+    width: auto;
+    display: block;
+    margin-bottom: 0.2rem;
+    mix-blend-mode: screen;
+  }
+  #gate .gate-album {
+    font-family: 'Libre Baskerville', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: #6e6358;
+    margin-bottom: 2.8rem;
+  }
+  #gate .gate-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #6e6358;
+    margin-bottom: 0.7rem;
+  }
+  #gate-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+    width: 280px;
+  }
+  #gate-input {
+    width: 100%;
+    background: #2e2822;
+    border: 1px solid rgba(237,224,207,0.12);
+    color: #ede0cf;
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1rem;
+    padding: 0.8rem 1.1rem;
+    text-align: center;
+    letter-spacing: 0.2em;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-text-security: disc;
+  }
+  #gate-input:focus { border-color: #c0392b; }
+  #gate-input::placeholder { color: #3a322b; letter-spacing: 0.08em; -webkit-text-security: none; }
+  #gate-submit {
+    width: 100%;
+    background: #c0392b;
+    color: #ede0cf;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.82rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  #gate-submit:hover { background: #e8443a; }
+  #gate-error {
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    color: #c0392b;
+    min-height: 1.1rem;
+    text-align: center;
+  }
+  #gate.unlocking {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  body.locked > *:not(#gate) {
+    filter: blur(10px);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* =====================================================
      TAQED — DESIGN TOKENS
   ===================================================== */
   :root {
     --bg:        #191510;
     --bg2:       #201c17;
+    --bg3:       #28231e;
     --surface:   #2e2822;
     --surface2:  #3a322b;
     --red:       #c0392b;
@@ -79,15 +172,18 @@
   }
 
   .nav-logo {
-    font-family: var(--font-head);
-    font-weight: 900;
-    font-size: 1.9rem;
-    letter-spacing: -0.02em;
-    color: var(--cream);
     text-decoration: none;
     line-height: 1;
+    display: flex;
+    align-items: center;
   }
-  .nav-logo .q { color: var(--red); }
+  .nav-logo-img {
+    height: 36px;
+    width: auto;
+    display: block;
+    /* Logo has black bg — mix-blend-mode makes it transparent on dark nav */
+    mix-blend-mode: screen;
+  }
 
   nav ul {
     list-style: none;
@@ -937,13 +1033,15 @@
   }
 
   .footer-logo {
-    font-family: var(--font-head);
-    font-weight: 900;
-    font-size: 1.5rem;
-    color: var(--cream);
-    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
   }
-  .footer-logo .q { color: var(--red); }
+  .footer-logo-img {
+    height: 28px;
+    width: auto;
+    display: block;
+    mix-blend-mode: screen;
+  }
 
   footer p {
     font-family: var(--font-head);
@@ -1016,12 +1114,38 @@
 </style>
 </head>
 <body>
+<!-- ===================== GATE-START =====================
+     Remove this entire block (down to GATE-END) on release day.
+     Also remove the checkPassword() call at the bottom of the script.
+====================================================== -->
+<div id="gate">
+  <img src="assets/taqed-logo.png" alt="taqed" class="gate-logo">
+  <div class="gate-album">that hits the spot</div>
+  <div class="gate-label">Enter password to continue</div>
+  <div id="gate-form">
+    <input
+      id="gate-input"
+      type="text"
+      placeholder="password"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+      autofocus
+    />
+    <button id="gate-submit" onclick="checkPassword()">Enter</button>
+    <div id="gate-error"></div>
+  </div>
+</div>
+<!-- ===================== GATE-END ===================== -->
+
+
 
 <!-- =====================================================
      NAVIGATION
 ===================================================== -->
 <nav id="mainNav">
-  <a class="nav-logo" href="#">ta<span class="q">q</span>ed</a>
+  <a class="nav-logo" href="#"><img src="assets/taqed-logo.png" alt="taqed" class="nav-logo-img"></a>
   <ul>
     <li><a href="#music">Music</a></li>
     <li><a href="#about">About</a></li>
@@ -1290,7 +1414,7 @@
      FOOTER
 ===================================================== -->
 <footer>
-  <div class="footer-logo">ta<span class="q">q</span>ed</div>
+  <div class="footer-logo"><img src="assets/taqed-logo.png" alt="taqed" class="footer-logo-img"></div>
   <div class="footer-social">
     <a href="https://instagram.com/taqedband" target="_blank" rel="noopener">Instagram</a>
     <a href="https://open.spotify.com" target="_blank" rel="noopener">Spotify</a>
@@ -1352,7 +1476,7 @@
    ▼▼▼  ONLY LINE YOU NEED TO CHANGE  ▼▼▼
    Paste your Cloudflare R2 public bucket URL here (no trailing slash).
    ------------------------------------------------------------------ */
-const R2_BASE = "https://media.taqed.com";
+const R2_BASE = "https://pub-REPLACEME.r2.dev";
 
 /* ------------------------------------------------------------------
    MANIFEST URL — fetched on page load
@@ -1374,7 +1498,7 @@ function slugToTitle(slug) {
 /* ------------------------------------------------------------------
    MANIFEST LOADER
    Fetches manifest.json from R2 and builds the TRACKS array.
-   Falls back to a helpful error state if the manifest can't load.  Work now?
+   Falls back to a helpful error state if the manifest can't load.
    ------------------------------------------------------------------ */
 let TRACKS = [];
 
@@ -1875,6 +1999,59 @@ function handleSubscribe(e) {
    FOOTER YEAR
    ------------------------------------------------------------------ */
 document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+
+/* ------------------------------------------------------------------
+   PASSWORD GATE — remove checkPassword() call and this function on release day
+   Change the password string below to whatever you want.
+   ------------------------------------------------------------------ */
+function checkPassword() {
+  // ▼ CHANGE THIS to your chosen password
+  const CORRECT = "taqed2025";
+
+  const input = document.getElementById('gate-input').value.trim();
+  const errEl = document.getElementById('gate-error');
+
+  if (input === CORRECT) {
+    errEl.textContent = '';
+    const gate = document.getElementById('gate');
+    gate.classList.add('unlocking');
+    document.body.classList.remove('locked');
+    // Remove gate from DOM after fade
+    setTimeout(() => gate.remove(), 600);
+    // Persist unlock for this browser session
+    sessionStorage.setItem('taqed_unlocked', '1');
+  } else {
+    errEl.textContent = 'incorrect password';
+    document.getElementById('gate-input').value = '';
+    document.getElementById('gate-input').focus();
+    // Brief shake animation
+    const f = document.getElementById('gate-form');
+    f.style.transform = 'translateX(-8px)';
+    setTimeout(() => f.style.transform = 'translateX(8px)', 80);
+    setTimeout(() => f.style.transform = 'translateX(0)', 160);
+  }
+}
+
+// Allow Enter key to submit
+document.getElementById('gate-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPassword();
+});
+
+
+/* ------------------------------------------------------------------
+   GATE INIT — remove this block on release day
+   ------------------------------------------------------------------ */
+(function() {
+  // If already unlocked this session, skip gate immediately
+  if (sessionStorage.getItem('taqed_unlocked') === '1') {
+    const gate = document.getElementById('gate');
+    if (gate) gate.remove();
+    document.body.classList.remove('locked');
+  } else {
+    document.body.classList.add('locked');
+  }
+})();
 
 /* ------------------------------------------------------------------
    INIT — load manifest from R2, then build player
