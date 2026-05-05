@@ -701,12 +701,17 @@
 
   /* WORD — karaoke sweep unit */
   .word {
-    display: inline;
+    display: inline-block;
     position: relative;
     color: var(--surface2);
     font-weight: 400;
-    white-space: pre-wrap;
+    white-space: pre;
+    cursor: pointer;
+    transition: color 0.15s;
   }
+
+  /* Hover — nudge future/past words visible on hover */
+  .word:hover { color: var(--warm-gray) !important; }
 
   /* Past words — dimly lit */
   .lyric-line.active .word.word-past,
@@ -721,17 +726,26 @@
     font-weight: 700;
   }
 
-  /* Sweep overlay — bright text revealed left-to-right via clip-path */
+  /* Sweep overlay — bright text revealed left-to-right via clip-path.
+     Must match parent exactly: same font, size, weight, line-height.
+     position:absolute on an inline-block parent works correctly. */
   .word.word-current::after {
     content: attr(data-word);
     position: absolute;
     left: 0;
     top: 0;
+    width: 100%;
+    height: 100%;
     color: var(--cream);
     font-weight: 700;
-    white-space: pre-wrap;
+    white-space: pre;
     clip-path: inset(0 var(--clip-r, 100%) 0 0);
     pointer-events: none;
+    /* Prevent any sub-pixel layout shift between base and overlay */
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
   }
 
   .no-lyrics {
@@ -1701,24 +1715,52 @@ function renderLyrics(lines) {
       lineEl.innerHTML = '&nbsp;';
     } else {
       line.words.forEach((w, wi) => {
+        // Strip trailing/leading whitespace from the timed token,
+        // then re-add a plain text space node AFTER the span so spacing
+        // is never inside the inline-block (which would misalign ::after).
+        const raw   = w.text;
+        const token = raw.trimEnd();
+        const trail = raw.slice(token.length); // captured trailing space(s)
+
         const span = document.createElement('span');
         span.className = 'word';
         span.dataset.begin = w.begin;
         span.dataset.end   = w.end;
         span.dataset.wi    = wi;
-        // data-word drives the ::after pseudo-element content
-        span.setAttribute('data-word', w.text);
-        span.textContent = w.text;
+
+        // data-word must match exactly what is visually rendered
+        span.setAttribute('data-word', token);
+        span.textContent = token;
+
+        // Click word → seek to word start
+        span.addEventListener('click', (e) => {
+          e.stopPropagation();
+          simTime = w.begin;
+          if (useRealAudio && audioEl) audioEl.currentTime = simTime;
+          updateProgress(simTime / simDuration);
+          syncLyrics(simTime);
+          if (!isPlaying) { startPlayback(); }
+        });
+
         lineEl.appendChild(span);
+
+        // Re-add inter-word space as a plain text node (never inside .word)
+        if (trail) {
+          lineEl.appendChild(document.createTextNode(trail));
+        } else if (wi < line.words.length - 1) {
+          // TTML didn't include trailing space in the span text — add one
+          lineEl.appendChild(document.createTextNode(' '));
+        }
       });
     }
 
-    // Click line to seek to its start
+    // Click the line gap (not a word) to seek to line start
     lineEl.addEventListener('click', () => {
       simTime = line.begin;
       if (useRealAudio && audioEl) audioEl.currentTime = simTime;
       updateProgress(simTime / simDuration);
       syncLyrics(simTime);
+      if (!isPlaying) { startPlayback(); }
     });
 
     scroll.appendChild(lineEl);
