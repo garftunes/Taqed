@@ -680,7 +680,7 @@
   }
 
   .lyrics-scroll {
-    max-height: 210px;
+    max-height: 240px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--surface2) transparent;
@@ -688,22 +688,51 @@
   .lyrics-scroll::-webkit-scrollbar { width: 3px; }
   .lyrics-scroll::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
 
+  /* LINE — block container */
   .lyric-line {
     display: block;
     font-family: var(--font-body);
-    font-size: 0.93rem;
-    line-height: 2.1;
+    font-size: 1.05rem;
+    line-height: 2.4;
+    cursor: default;
+    user-select: none;
+  }
+  .lyric-line.empty { line-height: 1.2; }
+
+  /* WORD — karaoke sweep unit */
+  .word {
+    display: inline;
+    position: relative;
+    color: var(--surface2);
+    font-weight: 400;
+    white-space: pre-wrap;
+  }
+
+  /* Past words — dimly lit */
+  .lyric-line.active .word.word-past,
+  .lyric-line.line-past .word {
     color: var(--warm-gray);
-    transition: color 0.35s;
-    cursor: pointer;
+    font-weight: 400;
   }
-  .lyric-line:hover { color: var(--cream-dim); }
-  .lyric-line.past { color: var(--surface2); transition: color 0.5s; }
-  .lyric-line.current {
+
+  /* Current word — bold base layer */
+  .word.word-current {
+    color: var(--warm-gray);
+    font-weight: 700;
+  }
+
+  /* Sweep overlay — bright text revealed left-to-right via clip-path */
+  .word.word-current::after {
+    content: attr(data-word);
+    position: absolute;
+    left: 0;
+    top: 0;
     color: var(--cream);
-    font-style: italic;
+    font-weight: 700;
+    white-space: pre-wrap;
+    clip-path: inset(0 var(--clip-r, 100%) 0 0);
+    pointer-events: none;
   }
-  .lyric-line.empty { user-select: none; cursor: default; }
 
   .no-lyrics {
     font-family: var(--font-body);
@@ -1056,7 +1085,7 @@
     <h1 class="hero-band-name fade-up delay-1">ta<span class="q">q</span>ed</h1>
     <p class="hero-album-title fade-up delay-2">that hits the spot</p>
     <p class="hero-desc fade-up delay-3">
-     <em>That Hits the Spot</em> celebrates the real things in life: pain, impermanence and love. Acoustic folk rock scrawled with the scars of life. Songs that don't flinch. Music etched in you long after the needle lifts.
+      Acoustic folk rock rooted in raw honesty. Songs that don't flinch. Music that stays with you long after the needle lifts.
     </p>
     <div class="hero-actions fade-up delay-4">
       <a href="#music" class="btn-primary">
@@ -1186,12 +1215,10 @@
   <div class="about-grid">
     <div>
       <div class="section-eyebrow">About</div>
-      <div class="section-title" style="margin-bottom:1.5rem">The Artist</div>
+      <div class="section-title" style="margin-bottom:1.5rem">The Band</div>
       <div class="about-text">
-        <p>after losing full hearing in my ear due to an acoustic neuroma, I took on the pseudonym, taqed, to create music and tell stories I previously lacked the courage to share.</p>
-        <p>while I am racing against time and inevitable deafness, I am pausing to celebrate the joy of hearing and the magic of sound.</p>
-        <p>taqed makes music that gets under your skin — lyrics that look you straight in the eye.</p>
-        <p>the name is a provocation. the music is the result</p>
+        <p>taqed makes music that gets under your skin — acoustic folk rock with an electric pulse, and lyrics that look you straight in the eye.</p>
+        <p>The name is a provocation. The music is the proof. <em>That Hits the Spot</em> is the new album.</p>
         <p style="margin-top:1.5rem">
           <!--
             BOOKING: Replace email below.
@@ -1201,7 +1228,7 @@
       </div>
     </div>
     <blockquote class="about-quote">
-      "Music should feel like something happened.<br>Life happened."
+      "Music should feel like something happened.<br>Something real."
     </blockquote>
   </div>
 </section>
@@ -1219,6 +1246,14 @@
     To hide shows, delete the .show-item divs and uncomment the placeholder below.
   -->
   <div class="shows-list">
+    <div class="show-item">
+      <div class="show-date">TBA</div>
+      <div>
+        <div class="show-venue">Venue Name</div>
+        <div class="show-location">City, State</div>
+      </div>
+      <a href="#" class="btn-ticket">Tickets</a>
+    </div>
     <div class="show-item">
       <div class="show-date">TBA</div>
       <div>
@@ -1265,12 +1300,11 @@
     <div class="contact-links">
       <!--
         SOCIAL LINKS: Replace # with your actual URLs.
-      
+      -->
       <div class="contact-link-item">
         <span class="contact-link-label">Instagram</span>
         <a href="https://instagram.com/taqedband" target="_blank" rel="noopener">@taqedband</a>
       </div>
-      -->
       <div class="contact-link-item">
         <span class="contact-link-label">Spotify</span>
         <a href="https://open.spotify.com" target="_blank" rel="noopener">taqed on Spotify</a>
@@ -1281,7 +1315,7 @@
       </div>
       <div class="contact-link-item">
         <span class="contact-link-label">Email</span>
-        <a href="mailto:info@taqed.com">info@taqed.com</a>
+        <a href="mailto:hello@taqed.com">hello@taqed.com</a>
       </div>
     </div>
   </div>
@@ -1293,7 +1327,7 @@
 <footer>
   <div class="footer-logo"><img src="assets/taqed-logo.png" alt="taqed" class="footer-logo-img"></div>
   <div class="footer-social">
-   <!-- <a href="https://instagram.com/taqedband" target="_blank" rel="noopener">Instagram</a> -->
+    <a href="https://instagram.com/taqedband" target="_blank" rel="noopener">Instagram</a>
     <a href="https://open.spotify.com" target="_blank" rel="noopener">Spotify</a>
     <a href="https://taqed.bandcamp.com" target="_blank" rel="noopener">Bandcamp</a>
   </div>
@@ -1353,7 +1387,7 @@
    ▼▼▼  ONLY LINE YOU NEED TO CHANGE  ▼▼▼
    Paste your Cloudflare R2 public bucket URL here (no trailing slash).
    ------------------------------------------------------------------ */
-const R2_BASE = "https://media.taqed.com";
+const R2_BASE = "https://pub-REPLACEME.r2.dev";
 
 /* ------------------------------------------------------------------
    MANIFEST URL — fetched on page load
@@ -1471,27 +1505,46 @@ let useRealAudio = false;
    Parses standard TTML XML and returns [{time, text}] array.
    Handles both "HH:MM:SS.mmm" and "SS.mmm" begin formats.
    ------------------------------------------------------------------ */
+function ttmlTimeToSeconds(ts) {
+  if (!ts) return 0;
+  const clean = ts.replace(/s$/, '');
+  const parts = clean.split(':').map(parseFloat);
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  return parts[0];
+}
+
 function parseTTML(xmlStr) {
   try {
     const doc = new DOMParser().parseFromString(xmlStr, 'text/xml');
-    const paragraphs = [...doc.querySelectorAll('p')];
-    return paragraphs.map(p => ({
-      time: ttmlTimeToSeconds(p.getAttribute('begin') || '0'),
-      text: p.textContent.replace(/\s+/g, ' ').trim()
-    })).filter(l => l.time !== null);
+    const lines = [];
+    doc.querySelectorAll('p').forEach(p => {
+      const lineBegin = ttmlTimeToSeconds(p.getAttribute('begin') || '0');
+      const lineEnd   = ttmlTimeToSeconds(p.getAttribute('end')   || '0');
+      const wordSpans = p.querySelectorAll('span');
+      const words = [];
+      if (wordSpans.length > 0) {
+        wordSpans.forEach(sp => {
+          const text = sp.textContent;
+          if (!text.trim()) return;
+          words.push({
+            text:  text,
+            begin: ttmlTimeToSeconds(sp.getAttribute('begin') || p.getAttribute('begin') || '0'),
+            end:   ttmlTimeToSeconds(sp.getAttribute('end')   || p.getAttribute('end')   || '0')
+          });
+        });
+      } else {
+        // Line-level only — treat full line as one word block
+        const text = p.textContent.replace(/\s+/g, ' ').trim();
+        if (text) words.push({ text, begin: lineBegin, end: lineEnd });
+      }
+      if (words.length) lines.push({ begin: lineBegin, end: lineEnd, words });
+    });
+    return lines;
   } catch(e) {
     console.warn('TTML parse error:', e);
     return [];
   }
-}
-
-function ttmlTimeToSeconds(ts) {
-  if (!ts) return 0;
-  // Format: HH:MM:SS.mmm or MM:SS.mmm or SS.mmm
-  const parts = ts.split(':').map(parseFloat);
-  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-  if (parts.length === 2) return parts[0] * 60 + parts[1];
-  return parts[0];
 }
 
 /* ------------------------------------------------------------------
@@ -1626,42 +1679,103 @@ function renderLyrics(lines) {
     scroll.innerHTML = '<span class="no-lyrics">No lyrics available for this track.</span>';
     return;
   }
-  scroll.innerHTML = lines.map((l, i) =>
-    `<span class="lyric-line${l.text === '' ? ' empty' : ''}" data-time="${l.time}" data-idx="${i}">${
-      l.text ? escHtml(l.text) : '&nbsp;'
-    }</span>`
-  ).join('');
 
-  // Click-to-seek on lyric lines
-  scroll.querySelectorAll('.lyric-line:not(.empty)').forEach(el => {
-    el.addEventListener('click', () => {
-      simTime = parseFloat(el.dataset.time);
+  // Support both old {time, text} format and new {begin, end, words} format
+  const normalized = lines.map(l => {
+    if (l.words) return l;
+    // Legacy inline format
+    return {
+      begin: l.time || 0,
+      end:   (l.time || 0) + 999,
+      words: l.text ? [{ text: l.text, begin: l.time || 0, end: (l.time || 0) + 999 }] : []
+    };
+  });
+
+  scroll.innerHTML = '';
+  normalized.forEach((line, li) => {
+    const lineEl = document.createElement('span');
+    lineEl.className = 'lyric-line';
+    lineEl.dataset.begin = line.begin;
+    lineEl.dataset.end   = line.end;
+    lineEl.dataset.li    = li;
+
+    if (!line.words.length) {
+      lineEl.classList.add('empty');
+      lineEl.innerHTML = '&nbsp;';
+    } else {
+      line.words.forEach((w, wi) => {
+        const span = document.createElement('span');
+        span.className = 'word';
+        span.dataset.begin = w.begin;
+        span.dataset.end   = w.end;
+        span.dataset.wi    = wi;
+        // data-word drives the ::after pseudo-element content
+        span.setAttribute('data-word', w.text);
+        span.textContent = w.text;
+        lineEl.appendChild(span);
+      });
+    }
+
+    // Click line to seek to its start
+    lineEl.addEventListener('click', () => {
+      simTime = line.begin;
       if (useRealAudio && audioEl) audioEl.currentTime = simTime;
       updateProgress(simTime / simDuration);
       syncLyrics(simTime);
     });
+
+    scroll.appendChild(lineEl);
   });
 }
 
-function syncLyrics(currentTime) {
-  const lines = document.querySelectorAll('#lyricsScroll .lyric-line[data-time]');
-  let activeIdx = -1;
-  lines.forEach((l, i) => {
-    if (currentTime >= parseFloat(l.dataset.time)) activeIdx = i;
+function syncLyrics(t) {
+  const scrollEl = document.getElementById('lyricsScroll');
+  const lineEls  = scrollEl.querySelectorAll('.lyric-line');
+
+  lineEls.forEach(lineEl => {
+    const lb = parseFloat(lineEl.dataset.begin);
+    const le = parseFloat(lineEl.dataset.end);
+
+    if (t > le) {
+      lineEl.classList.remove('active');
+      lineEl.classList.add('line-past');
+    } else if (t >= lb) {
+      lineEl.classList.add('active');
+      lineEl.classList.remove('line-past');
+      // Scroll active line into centre of scroll window (throttled)
+      if (!syncLyrics._scrollPending) {
+        syncLyrics._scrollPending = true;
+        requestAnimationFrame(() => {
+          const lineTop    = lineEl.offsetTop - scrollEl.offsetTop;
+          const scrollTarget = lineTop - scrollEl.clientHeight / 2 + lineEl.clientHeight / 2;
+          scrollEl.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+          syncLyrics._scrollPending = false;
+        });
+      }
+    } else {
+      lineEl.classList.remove('active', 'line-past');
+    }
   });
-  lines.forEach((l, i) => {
-    l.classList.remove('current', 'past');
-    if (i < activeIdx)      l.classList.add('past');
-    else if (i === activeIdx) {
-      l.classList.add('current');
-      // Keep active line in view
-      const scrollEl = document.getElementById('lyricsScroll');
-      const lineTop = l.offsetTop - scrollEl.offsetTop;
-      const scrollTarget = lineTop - scrollEl.clientHeight / 2 + l.clientHeight / 2;
-      scrollEl.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+
+  // Word-level sweep
+  const wordEls = scrollEl.querySelectorAll('.word');
+  wordEls.forEach(w => {
+    const wb = parseFloat(w.dataset.begin);
+    const we = parseFloat(w.dataset.end);
+    w.classList.remove('word-past', 'word-current');
+    w.style.removeProperty('--clip-r');
+
+    if (t >= we) {
+      w.classList.add('word-past');
+    } else if (t >= wb) {
+      w.classList.add('word-current');
+      const pct     = Math.max(0, Math.min(1, (t - wb) / (we - wb)));
+      const clipR   = ((1 - pct) * 100).toFixed(2) + '%';
+      w.style.setProperty('--clip-r', clipR);
     }
   });
 }
+syncLyrics._scrollPending = false;
 
 /* ------------------------------------------------------------------
    PROGRESS UPDATE
@@ -1700,8 +1814,12 @@ document.getElementById('waveform').addEventListener('click', function(e) {
    ------------------------------------------------------------------ */
 function startSim() {
   stopSim();
-  simInterval = setInterval(() => {
-    simTime = Math.min(simTime + 0.25, simDuration);
+  let lastTs = null;
+  function tick(ts) {
+    if (!lastTs) lastTs = ts;
+    const delta = Math.min((ts - lastTs) / 1000, 0.1);
+    lastTs = ts;
+    simTime = Math.min(simTime + delta, simDuration);
     updateProgress(simTime / simDuration);
     syncLyrics(simTime);
     if (simTime >= simDuration) {
@@ -1712,12 +1830,15 @@ function startSim() {
       if (currentIdx < TRACKS.length - 1) {
         setTimeout(() => { selectTrack(currentIdx + 1); startPlayback(); }, 500);
       }
+      return;
     }
-  }, 250);
+    simInterval = requestAnimationFrame(tick);
+  }
+  simInterval = requestAnimationFrame(tick);
 }
 
 function stopSim() {
-  if (simInterval) { clearInterval(simInterval); simInterval = null; }
+  if (simInterval) { cancelAnimationFrame(simInterval); simInterval = null; }
 }
 
 /* ------------------------------------------------------------------
