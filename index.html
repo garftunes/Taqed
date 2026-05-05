@@ -1513,12 +1513,18 @@ let useRealAudio = false;
 
 /* ------------------------------------------------------------------
    TTML PARSER
-   Parses standard TTML XML and returns [{time, text}] array.
-   Handles both "HH:MM:SS.mmm" and "SS.mmm" begin formats.
+   Handles Apple/Composer TTML format where inter-word spaces are
+   plain text nodes BETWEEN <span> elements, not inside them:
+     <span begin="0:20.065" end="0:20.462">Your</span> <span ...>lovely</span>
+   Walking childNodes (not querySelectorAll) captures both spans and
+   the whitespace text nodes between them.
+   Timestamp formats supported: M:SS.mmm  MM:SS.mmm  HH:MM:SS.mmm  SS.mmms
    ------------------------------------------------------------------ */
 function ttmlTimeToSeconds(ts) {
   if (!ts) return 0;
+  // Strip trailing 's' (e.g. "3.5s" format)
   const clean = ts.replace(/s$/, '');
+  // Split on ':' — handles M:SS.mmm, MM:SS.mmm, HH:MM:SS.mmm
   const parts = clean.split(':').map(parseFloat);
   if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
   if (parts.length === 2) return parts[0] * 60 + parts[1];
@@ -1528,29 +1534,68 @@ function ttmlTimeToSeconds(ts) {
 function parseTTML(xmlStr) {
   try {
     const doc = new DOMParser().parseFromString(xmlStr, 'text/xml');
+    const parseErr = doc.querySelector('parsererror');
+    if (parseErr) throw new Error('XML parse error: ' + parseErr.textContent);
+
     const lines = [];
+
     doc.querySelectorAll('p').forEach(p => {
       const lineBegin = ttmlTimeToSeconds(p.getAttribute('begin') || '0');
       const lineEnd   = ttmlTimeToSeconds(p.getAttribute('end')   || '0');
-      const wordSpans = p.querySelectorAll('span');
       const words = [];
-      if (wordSpans.length > 0) {
-        wordSpans.forEach(sp => {
-          const text = sp.textContent;
-          if (!text.trim()) return;
+      let hasSpans = false;
+
+      // Walk every child node — spans get timestamps, text nodes become
+      // trailing space on the preceding word (or leading space on next)
+      let pendingSpace = '';
+
+      p.childNodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          // Text node between spans — capture the whitespace
+          const t = node.textContent;
+          if (t.trim() === '') {
+            // Pure whitespace — attach to previous word as trailing space
+            // or hold as pending leading space for next word
+            if (words.length > 0) {
+              // Append one space to the last word's text
+              // (already trimmed — add exactly one space)
+              if (!words[words.length - 1].trailingSpace) {
+                words[words.length - 1].trailingSpace = ' ';
+              }
+            } else {
+              pendingSpace = ' ';
+            }
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'span') {
+          hasSpans = true;
+          const wordText = node.textContent;
+          if (!wordText) return;
+
+          // Strip any whitespace the span itself contains at edges
+          // and track it as trailing space instead
+          const trimmed  = wordText.trimEnd();
+          const trailing = wordText.slice(trimmed.length);
+
           words.push({
-            text:  text,
-            begin: ttmlTimeToSeconds(sp.getAttribute('begin') || p.getAttribute('begin') || '0'),
-            end:   ttmlTimeToSeconds(sp.getAttribute('end')   || p.getAttribute('end')   || '0')
+            // Prepend any pending leading space from a preceding text node
+            text:         pendingSpace + trimmed,
+            begin:        ttmlTimeToSeconds(node.getAttribute('begin') || p.getAttribute('begin') || '0'),
+            end:          ttmlTimeToSeconds(node.getAttribute('end')   || p.getAttribute('end')   || '0'),
+            trailingSpace: trailing || ''
           });
-        });
-      } else {
-        // Line-level only — treat full line as one word block
+          pendingSpace = '';
+        }
+      });
+
+      if (!hasSpans) {
+        // Line-level only — no word spans — treat whole line as one block
         const text = p.textContent.replace(/\s+/g, ' ').trim();
-        if (text) words.push({ text, begin: lineBegin, end: lineEnd });
+        if (text) words.push({ text, begin: lineBegin, end: lineEnd, trailingSpace: '' });
       }
+
       if (words.length) lines.push({ begin: lineBegin, end: lineEnd, words });
     });
+
     return lines;
   } catch(e) {
     console.warn('TTML parse error:', e);
@@ -1715,12 +1760,10 @@ function renderLyrics(lines) {
       lineEl.innerHTML = '&nbsp;';
     } else {
       line.words.forEach((w, wi) => {
-        // Strip trailing/leading whitespace from the timed token,
-        // then re-add a plain text space node AFTER the span so spacing
-        // is never inside the inline-block (which would misalign ::after).
-        const raw   = w.text;
-        const token = raw.trimEnd();
-        const trail = raw.slice(token.length); // captured trailing space(s)
+        // text is already trimmed by the parser.
+        // trailingSpace holds any space that followed the span in the TTML.
+        const token = w.text;
+        const trail = w.trailingSpace || (wi < line.words.length - 1 ? ' ' : '');
 
         const span = document.createElement('span');
         span.className = 'word';
@@ -1728,11 +1771,11 @@ function renderLyrics(lines) {
         span.dataset.end   = w.end;
         span.dataset.wi    = wi;
 
-        // data-word must match exactly what is visually rendered
+        // data-word drives ::after — must match rendered text exactly
         span.setAttribute('data-word', token);
         span.textContent = token;
 
-        // Click word → seek to word start
+        // Click word → seek to word start and start playback
         span.addEventListener('click', (e) => {
           e.stopPropagation();
           simTime = w.begin;
@@ -1744,12 +1787,9 @@ function renderLyrics(lines) {
 
         lineEl.appendChild(span);
 
-        // Re-add inter-word space as a plain text node (never inside .word)
+        // Space lives OUTSIDE the inline-block span — never inside it
         if (trail) {
           lineEl.appendChild(document.createTextNode(trail));
-        } else if (wi < line.words.length - 1) {
-          // TTML didn't include trailing space in the span text — add one
-          lineEl.appendChild(document.createTextNode(' '));
         }
       });
     }
